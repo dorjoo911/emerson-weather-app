@@ -1,5 +1,10 @@
 .App {
   text-align: center;
+  background-image: url("../public/weather.jpg");
+  height: 800px;
+  background-position: center;
+  background-size: cover;
+  color: blue;
 }
 
 .App-logo {
