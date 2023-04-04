@@ -1,14 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 function Weather() {
+  // State variables for location type, location value, weather data and error message
   const [locationType, setLocationType] = useState("city");
   const [locationValue, setLocationValue] = useState("");
   const [weather, setWeather] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
+  // Function to handle form submission and API call
   const handleSearch = async (e) => {
     e.preventDefault();
+    // API key for OpenWeatherMap API
     const apiKey = "cf002751564a4c78f5f7ed479f1b9ba3";
+    // API URL depending on location type selected
     let apiUrl;
 
     switch (locationType) {
@@ -26,9 +31,29 @@ function Weather() {
         return;
     }
 
-    const response = await axios.get(apiUrl);
-    setWeather(response.data);
+    try {
+      // Make API call using axios and update weather state with response data
+      const response = await axios.get(apiUrl);
+      setWeather(response.data);
+      setLocationValue("");
+      setErrorMessage(null);
+    } catch (error) {
+      // Handle error if API call fails and update error message state
+      if (error.response) {
+        setErrorMessage(error.response.data.message);
+      } else {
+        setErrorMessage("An unexpected error occurred.");
+      }
+      setWeather(null);
+    }
   };
+
+  // useEffect hook to reset location value state when location type changes
+  useEffect(() => {
+    setLocationValue("");
+    setErrorMessage(null);
+    setWeather(null);
+  }, [locationType]);
 
   return (
     <div>
@@ -45,6 +70,7 @@ function Weather() {
             <option value="coord">Coordinates</option>
           </select>
         </label>{" "}
+        {/* Render input field depending on location type selected */}
         {locationType === "city" && (
           <label>
             City Name:
@@ -77,10 +103,12 @@ function Weather() {
         )}
         <button type="submit">Search</button>
       </form>
+      {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+      {/* Render weather data or error message */}
       {weather && (
         <div>
           <h2>{weather.name}</h2>
-          <p>Temperature: {weather.main.temp} °C</p>
+          <p>Temperature: {weather.main.temp} °F</p>
           <p>Humidity: {weather.main.humidity} %</p>
           <p>Weather: {weather.weather[0].description}</p>
           <p>
